@@ -4,12 +4,14 @@ import android.animation.Animator
 import android.animation.Animator.AnimatorListener
 import android.animation.AnimatorInflater
 import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
+import org.w3c.dom.Attr
 import java.lang.Exception
 
 class TonyFlipView : FrameLayout {
@@ -51,12 +53,58 @@ class TonyFlipView : FrameLayout {
     private var flipDirection : FlipDirection = FlipDirection.VERTICAL_LEFT
     private var flipOnTouch : Boolean = true
     private var flipDuration : Int = 500
-    private lateinit var flipLeftIn : Animator
-    private lateinit var flipLeftOut : Animator
+    private var flipScale : Float = 0.8f
+
+    private lateinit var flipLeftIn : AnimatorSet
+    private lateinit var flipLeftOut : AnimatorSet
+    private lateinit var flipRightIn : AnimatorSet
+    private lateinit var flipRightOut : AnimatorSet
+    private val animatorList = mutableListOf<AnimatorSet>()
 
     private fun init(context: Context, attrs: AttributeSet?) {
-        flipLeftIn = AnimatorInflater.loadAnimator(context, R.animator.flip_left)
-        flipLeftOut = AnimatorInflater.loadAnimator(context, R.animator.flip_left_out)
+        loadAnimations()
+        loadAttributes(attrs)
+        applyAttributes()
+    }
+
+    private fun applyAttributes() {
+        for(animator in animatorList){
+            animator.childAnimations[0]?.duration = flipDuration.toLong()
+            animator.childAnimations[1]?.duration = flipDuration/2L
+            animator.childAnimations[2]?.duration = flipDuration/2L
+            animator.childAnimations[3]?.duration = flipDuration/2L
+            animator.childAnimations[4]?.duration = flipDuration/2L
+            animator.childAnimations[5]?.duration = flipDuration/2L
+            animator.childAnimations[4]?.startDelay = flipDuration/2L
+            animator.childAnimations[5]?.startDelay = flipDuration/2L
+        }
+    }
+
+    private fun loadAttributes(attrs : AttributeSet?) {
+        attrs?.let{
+            val attrArray = context.obtainStyledAttributes(attrs, R.styleable.tony_flip_view, 0, 0)
+            try{
+                flipDuration = attrArray.getInt(R.styleable.tony_flip_view_flipDuration, 500)
+                flipScale = attrArray.getFloat(R.styleable.tony_flip_view_flipScale, 0.8f)
+                //flipDirection
+            } catch (exception : Exception){
+                Log.e("TonyFlipView", exception.toString())
+            } finally {
+                attrArray.recycle()
+            }
+        }
+
+    }
+
+    private fun loadAnimations() {
+        flipLeftIn = AnimatorInflater.loadAnimator(context, R.animator.flip_left) as AnimatorSet
+        animatorList.add(flipLeftIn)
+        flipLeftOut = AnimatorInflater.loadAnimator(context, R.animator.flip_left_out) as AnimatorSet
+        animatorList.add(flipLeftOut)
+        flipRightIn = AnimatorInflater.loadAnimator(context, R.animator.flip_right) as AnimatorSet
+        animatorList.add(flipRightIn)
+        flipRightOut = AnimatorInflater.loadAnimator(context, R.animator.flip_right_out) as AnimatorSet
+        animatorList.add(flipRightOut)
 
         flipLeftOut.addListener(object : AnimatorListener{
             override fun onAnimationRepeat(animation: Animator?) {
@@ -76,19 +124,25 @@ class TonyFlipView : FrameLayout {
             override fun onAnimationStart(animation: Animator?) {
             }
         })
-        attrs?.let{
-            val attrArray = context.obtainStyledAttributes(attrs, R.styleable.tony_flip_view, 0, 0)
-            try{
-                flipOnTouch = attrArray.getBoolean(R.styleable.tony_flip_view_flipOnTouch, true)
-                flipDuration = attrArray.getInt(R.styleable.tony_flip_view_flipDuration, 500)
-                //flipDirection
-            } catch (exception : Exception){
-                Log.e("TonyFlipView", exception.toString())
-            } finally {
-                attrArray.recycle()
-            }
-        }
 
+        flipRightOut.addListener(object : AnimatorListener{
+            override fun onAnimationRepeat(animation: Animator?) {
+            }
+            override fun onAnimationEnd(animation: Animator?) {
+                if(flipState == FlipState.FRONT){
+                    flipState = FlipState.BACK
+                    frontView?.visibility = View.GONE
+                }
+                else{
+                    flipState = FlipState.FRONT
+                    backView?.visibility = View.GONE
+                }
+            }
+            override fun onAnimationCancel(animation: Animator?) {
+            }
+            override fun onAnimationStart(animation: Animator?) {
+            }
+        })
     }
 
     override fun onFinishInflate() {
@@ -98,7 +152,6 @@ class TonyFlipView : FrameLayout {
             throw Exception("Child count")
         }
 
-        Log.e("WONSIK", "$childCount")
         findChildViews()
     }
 
@@ -125,50 +178,51 @@ class TonyFlipView : FrameLayout {
             frontView = getChildAt(1)
             backView = getChildAt(0)
         }
-
-        if(frontView is FrameLayout){
-            Log.e("WONSIK", "frontView")
-        }
-        if(backView is FrameLayout){
-            Log.e("WONSIK", "backView")
-        }
         flipState = FlipState.FRONT
         backView?.visibility = View.GONE
     }
 
-    fun flip(){
-        when(flipDirection){
-            FlipDirection.VERTICAL_LEFT -> {
-                frontView?.visibility = View.VISIBLE
-                backView?.visibility = View.VISIBLE
+    fun flipLeft(){
+        frontView?.visibility = View.VISIBLE
+        backView?.visibility = View.VISIBLE
 
-                if(flipState == FlipState.FRONT){
-                    flipLeftOut.setTarget(frontView)
-                    flipLeftOut.start()
-                    backView?.let{
-                        flipLeftIn.setTarget(it)
-                        flipLeftIn.start()
-                    }
-                }
-                else{
-                    backView?.let{
-                        flipLeftOut.setTarget(it)
-                        flipLeftOut.start()
-                    }
-                    flipLeftIn.setTarget(frontView)
-                    flipLeftIn.start()
-                }
+        if(flipState == FlipState.FRONT){
+            flipLeftOut.setTarget(frontView)
+            flipLeftOut.start()
+            backView?.let{
+                flipLeftIn.setTarget(it)
+                flipLeftIn.start()
             }
+        }
+        else{
+            backView?.let{
+                flipLeftOut.setTarget(it)
+                flipLeftOut.start()
+            }
+            flipLeftIn.setTarget(frontView)
+            flipLeftIn.start()
         }
     }
 
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
+    fun flipRight(){
+        frontView?.visibility = View.VISIBLE
+        backView?.visibility = View.VISIBLE
+
         if(flipState == FlipState.FRONT){
-            frontView?.dispatchTouchEvent(event)
+            flipRightOut.setTarget(frontView)
+            flipRightOut.start()
+            backView?.let{
+                flipRightIn.setTarget(it)
+                flipRightIn.start()
+            }
         }
         else{
-            backView?.dispatchTouchEvent(event)
+            backView?.let{
+                flipRightOut.setTarget(it)
+                flipRightOut.start()
+            }
+            flipLeftIn.setTarget(frontView)
+            flipLeftIn.start()
         }
-        return true
     }
 }

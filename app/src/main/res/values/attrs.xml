@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="tony_flip_view">
-        <attr name="flipOnTouch" format="boolean"/>
         <attr name="flipDuration" format="integer"/>
-        <attr name="flipType" format="string"/>
         <attr name="flipScale" format="float"/>
     </declare-styleable>
 </resources>
