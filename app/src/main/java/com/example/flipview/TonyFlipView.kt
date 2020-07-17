@@ -188,19 +188,25 @@ class TonyFlipView : FrameLayout {
 
         if(flipState == FlipState.FRONT){
             flipLeftOut.setTarget(frontView)
-            flipLeftOut.start()
+            //flipLeftOut.start()
             backView?.let{
                 flipLeftIn.setTarget(it)
-                flipLeftIn.start()
+                //flipLeftIn.start()
             }
+            val anims = AnimatorSet()
+            anims.playTogether(flipLeftOut, flipLeftIn)
+            anims.start()
         }
         else{
             backView?.let{
                 flipLeftOut.setTarget(it)
-                flipLeftOut.start()
+                //flipLeftOut.start()
             }
             flipLeftIn.setTarget(frontView)
-            flipLeftIn.start()
+            //flipLeftIn.start()
+            val anims = AnimatorSet()
+            anims.playTogether(flipLeftOut, flipLeftIn)
+            anims.start()
         }
     }
 
@@ -210,19 +216,25 @@ class TonyFlipView : FrameLayout {
 
         if(flipState == FlipState.FRONT){
             flipRightOut.setTarget(frontView)
-            flipRightOut.start()
+            //flipRightOut.start()
             backView?.let{
                 flipRightIn.setTarget(it)
-                flipRightIn.start()
+                //flipRightIn.start()
             }
+            val anims = AnimatorSet()
+            anims.playTogether(flipRightOut, flipRightIn)
+            anims.start()
         }
         else{
             backView?.let{
                 flipRightOut.setTarget(it)
-                flipRightOut.start()
+                //flipRightOut.start()
             }
-            flipLeftIn.setTarget(frontView)
-            flipLeftIn.start()
+            flipRightIn.setTarget(frontView)
+            //flipRightIn.start()
+            val anims = AnimatorSet()
+            anims.playTogether(flipRightOut, flipRightIn)
+            anims.start()
         }
     }
 }

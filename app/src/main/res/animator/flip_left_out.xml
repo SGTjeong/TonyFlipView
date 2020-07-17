@@ -13,30 +13,30 @@
         android:valueFrom="1.0"
         android:valueTo="0.0"
         android:propertyName="alpha"
-        android:startOffset="250"
+        android:startOffset="249"
         android:duration="1" />
 
     <objectAnimator
         android:valueFrom="1.0"
-        android:valueTo="0.8"
+        android:valueTo="0.9"
         android:propertyName="scaleX"
         android:duration="250" />
 
     <objectAnimator
         android:valueFrom="1.0"
-        android:valueTo="0.8"
+        android:valueTo="0.9"
         android:propertyName="scaleY"
         android:duration="250" />
 
     <objectAnimator
-        android:valueFrom="0.8"
+        android:valueFrom="0.9"
         android:valueTo="1.0"
         android:propertyName="scaleX"
         android:duration="250"
         android:startOffset="250"/>
 
     <objectAnimator
-        android:valueFrom="0.8"
+        android:valueFrom="0.9"
         android:valueTo="1.0"
         android:propertyName="scaleY"
         android:duration="250"
